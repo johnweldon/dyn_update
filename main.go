@@ -15,7 +15,7 @@ type IPUpdater interface {
 }
 
 func main() {
-	disc := ZyxelLookup(os.Getenv("ZYX_MODEM_URL"), os.Getenv("ZYX_USERNAME"), os.Getenv("ZYX_PASSWORD"))
+	disc := OpenDNS()
 	ipv4, err := disc.Find()
 	if err != nil {
 		log.Fatal(err)
