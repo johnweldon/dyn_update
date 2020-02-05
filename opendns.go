@@ -1,13 +1,30 @@
 package main
 
-import "net"
+import (
+	"context"
+	"net"
+)
 
-type openDNSLookup struct{}
+const (
+	opendnsResolver = "208.67.220.220"
+)
 
-func OpenDNS() openDNSLookup { return openDNSLookup{} }
+// OpenDNSResolver is used to lookup public ip with OpenDNS
+type OpenDNSResolver struct{}
 
-func (openDNSLookup) Find() (net.IP, error) {
-	ips, err := net.LookupHost("myip.opendns.com")
+// OpenDNS will return an OpenDNSIPResolver
+func OpenDNS() OpenDNSResolver { return OpenDNSResolver{} }
+
+// Find returns the apparent public IP
+func (OpenDNSResolver) Find() (net.IP, error) {
+	resolver := &net.Resolver{
+		PreferGo: true,
+		Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+			d := net.Dialer{}
+			return d.DialContext(ctx, "udp", net.JoinHostPort(opendnsResolver, "53"))
+		},
+	}
+	ips, err := resolver.LookupHost(context.Background(), "myip.opendns.com")
 	if err != nil {
 		return net.IP{}, err
 	}

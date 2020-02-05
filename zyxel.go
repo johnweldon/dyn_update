@@ -15,17 +15,20 @@ import (
 	"golang.org/x/net/publicsuffix"
 )
 
-type zyxelDiscovery struct {
+// ZyxelResolver implements an IP resolver
+type ZyxelResolver struct {
 	username string
 	password string
 	baseurl  string
 }
 
-func ZyxelLookup(baseURL string, username string, password string) IPDiscoverer {
-	return &zyxelDiscovery{baseurl: baseURL, username: username, password: password}
+// NewZyxelResolver returns a ZyxelResolver
+func NewZyxelResolver(baseURL string, username string, password string) *ZyxelResolver {
+	return &ZyxelResolver{baseurl: baseURL, username: username, password: password}
 }
 
-func (z *zyxelDiscovery) Find() (net.IP, error) {
+// Find returns the public IP address according to the modem
+func (z *ZyxelResolver) Find() (net.IP, error) {
 	jar, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 	if err != nil {
 		return net.IP{}, err

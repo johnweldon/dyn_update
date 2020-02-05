@@ -10,17 +10,20 @@ import (
 	"time"
 )
 
-type gdUpdater struct {
+// GoogleDomainsDNSUpdater implements a DNS updater for Google Domains
+type GoogleDomainsDNSUpdater struct {
 	hostname string
 	username string
 	password string
 }
 
-func GoogleDomainsUpdater(hostname string, username string, password string) IPUpdater {
-	return &gdUpdater{hostname: hostname, username: username, password: password}
+// NewGoogleDomainsUpdater returns an updater for Google Domains
+func NewGoogleDomainsUpdater(hostname string, username string, password string) *GoogleDomainsDNSUpdater {
+	return &GoogleDomainsDNSUpdater{hostname: hostname, username: username, password: password}
 }
 
-func (g *gdUpdater) Update(ip net.IP) error {
+// Update will update the DNS record
+func (g *GoogleDomainsDNSUpdater) Update(ip net.IP) error {
 	if !g.needsUpdate(ip) {
 		log.Printf("IP %q is current", ip.String())
 		return nil
@@ -61,12 +64,11 @@ func (g *gdUpdater) Update(ip net.IP) error {
 			return nil
 		}
 	default:
-		return fmt.Errorf("failed to update:\n%q\n", string(data))
+		return fmt.Errorf("failed to update:\n%s", string(data))
 	}
-	return fmt.Errorf("failed to update")
 }
 
-func (g *gdUpdater) needsUpdate(ip net.IP) bool {
+func (g *GoogleDomainsDNSUpdater) needsUpdate(ip net.IP) bool {
 	if ips, err := net.LookupIP(g.hostname); err == nil {
 		if len(ips) > 0 {
 			for _, i := range ips {
